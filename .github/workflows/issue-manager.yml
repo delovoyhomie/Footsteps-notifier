@@ -9,7 +9,7 @@ on:
       - edited
   issues:
     types:
-      - labeled
+      - unlabeled
   pull_request_target:
     types:
       - labeled
@@ -38,7 +38,7 @@ jobs:
                     "remove_label_on_close": false
                 },
                 "waiting": {
-                    "delay": 60,
+                    "delay": 1,
                     "message": "Closing after 8 days of waiting for the additional info requested.",
                     "remove_label_on_comment": true,
                     "remove_label_on_close": true
