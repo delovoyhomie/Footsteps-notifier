@@ -1,0 +1,38 @@
+name: Issue Manager
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Runs at 00:00 every day
+  issue_comment:
+    types:
+      - created
+      - edited
+  issues:
+    types:
+      - labeled
+      - unlabeled
+      - assigned
+      - unassigned
+  pull_request_target:
+    types:
+      - labeled
+      - unlabeled
+  workflow_dispatch:
+
+jobs:
+  issue-manager:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: tiangolo/issue-manager@0.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config: >
+            {
+              "waiting": {
+                "delay": 5, # Two weeks in seconds is 1209600
+                "exclude_labels": ["approved"],
+                "exclude_assignees": true,
+                "message": "Closing this issue due to inactivity for two weeks, with no 'approved' label, and no one assigned."
+              }
+            }
