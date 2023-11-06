@@ -9,7 +9,7 @@ on:
       - edited
   issues:
     types:
-      - unlabeled
+      - labeled
   pull_request_target:
     types:
       - labeled
