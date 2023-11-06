@@ -2,60 +2,38 @@ name: Issue Manager
 
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs at 00:00 every day
+    - cron: "0 0 * * *"
   issue_comment:
     types:
       - created
       - edited
   issues:
     types:
-      - opened
       - labeled
-      - unlabeled
-      - assigned
-      - unassigned
   pull_request_target:
     types:
       - labeled
-      - unlabeled
-      - assigned
-      - unassigned
   workflow_dispatch:
 
 jobs:
   issue-manager:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Close stale issues
-        uses: actions/github-script@v5
+      - uses: tiangolo/issue-manager@0.4.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const TWO_WEEKS = 10;
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: '!approved'
-            });
-            for (const issue of issues.data) {
-              if (!issue.assignees.length) {
-                const lastUpdated = new Date(issue.updated_at).getTime();
-                if (Date.now() - lastUpdated > TWO_WEEKS) {
-                  await github.rest.issues.createComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: issue.number,
-                    body: 'This issue has been automatically closed due to inactivity.'
-                  });
-                  await github.rest.issues.update({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: issue.number,
-                    state: 'closed'
-                  });
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config: >
+            {
+                "answered": {
+                    "delay": "P3DT12H30M5S",
+                    "message": "It seems the issue was answered, closing this now."
+                },
+                "validated": {
+                    "delay": 1,
+                    "message": "The issue could not be validated after 5 minutes. Closing now."
+                },
+                "waiting": {
+                    "delay": 1,
+                    "message": "Closing after 8 days of waiting for the additional info requested."
                 }
-              }
             }
